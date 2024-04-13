@@ -1,0 +1,82 @@
+在home目录下用dd命令创建一个10M大小的文件s01-10M.mp4和一个3M大小的文件s01-3M.png
+
+dd if=/dev/zero of=s01-10M.mp4 bs=1M count=10
+
+dd if=/dev/zero of=s01-3M.png bs=1M count=3
+
+touch可以用来修改文件修改的时间，也可以用来创建文件
+先创建文件，如果已存在该文件，则修改文件最后的修改时间
+
+chmod修改文件的权限
+
+Linux下的文件有read，write，execute三种权限
+文件的后缀名如：.c,.exe,.h没有什么实际的意义，只是为了区分
+
+更改文件的最后修改时间，你可以使用touch命令。下面是如何将s01-10M.mp4的最后修改时间更改为前天15:45:00，以及将s01-3M.png的最后修改时间更改为大前天8:15:00
+# 更改s01-10M.mp4的最后修改时间为前天15:45:00
+touch -d "2024-03-04 15:45:00" s01-10M.mp4
+
+# 更改s01-3M.png的最后修改时间为大前天8:15:00
+touch -d "2024-03-03 08:15:00" s01-3M.png
+
+创建最后修改时间为昨天14:30:00的文件s01-work01.c，以及最后修改时间为昨天10:25:00的文件s01-work01.h，你可以使用touch命令。
+# 创建昨天14:30:00的文件s01-work01.c
+touch -d "yesterday 14:30:00" s01-work01.c
+
+# 创建昨天10:25:00的文件s01-work01.h
+touch -d "yesterday 10:25:00" s01-work01.h
+
+***find命令的使用
+
+要利用find命令搜索/usr/bin目录下所有文件名以tr开头且不以数字结尾的文件，并将它们复制到courses/general目录中
+# 创建目标目录（如果不存在）
+mkdir -p courses/general
+
+# 使用find命令搜索符合条件的文件，并复制到目标目录
+find /usr/bin -type f -name 'tr*' ! -regex '.*/tr[0-9]*$' -exec cp {} courses/general \;
+find /usr/bin: 在/usr/bin目录下搜索文件。
+-type f: 限定搜索结果为普通文件。
+-name 'tr*': 匹配以tr开头的文件名。
+! -regex '.*/tr[0-9]*$': 排除以数字结尾的文件名。
+-exec cp {} courses/general \;: 对于每个匹配的文件，使用cp命令将其复制到courses/general目录中。
+
+
+*利用find命令搜索/usr/bin目录下所有文件名以tr开头且不以数字结尾的文件并将其复制到courses/general目录中
+find ~ -type f -size +10k -size -5M
+find ~: 在主目录中搜索文件。你也可以用你的用户名的主目录路径代替~。
+-type f: 限定搜索结果为普通文件。
+-size +10k -size -5M: 搜索文件大小超过10K且小于5M的文件。
+
+
+
+利用find命令搜索主目录中文件最后修改时间为1天（24小时）前，2天（48小时）内的文件
+find ~ -type f -mtime +1 -mtime -2
+find ~: 在主目录中搜索文件。你也可以用你的用户名的主目录路径代替~。
+-type f: 限定搜索结果为普通文件。
+-mtime +1 -mtime -2: 搜索最后修改时间在1天前到2天前之间的文件。
+要使用find命令搜索主目录中比文件s01-2M.exe更新的文件
+find ~ -type f -newer s01-2M.exe
+
+
+利用find命令查找/usr中大于20M的文件并将找到的文件复制到s01-big目录中。
+# 创建目标目录（如果不存在）
+mkdir -p s01-big
+
+# 使用find命令搜索符合条件的文件，并复制到目标目录
+find /usr -type f -size +20M -exec cp {} s01-big/ \;
+
+
+***tar打包压缩命令
+要将目录s01-big打包并压缩成s01-big.tar.bz2
+tar -cjf s01-big.tar.bz2 s01-big/
+将分割后的文件重新组合成s01-huge.tar.bz2
+cat s01-big.tar.bz2.* > s01-huge.tar.bz2
+tar -xjf s01-huge.tar.bz2
+
+通过md5散列值验证重新组合后的s01-huge.tar.bz2和原始文件s01-big.tar.bz2相同
+md5sum s01-huge.tar.bz2    md5sum s01-big.tar.bz2
+
+md5sum -c <(md5sum s01-huge.tar.bz2) <(md5sum s01-big.tar.bz2)
+
+
+
